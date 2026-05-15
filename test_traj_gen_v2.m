@@ -1,14 +1,18 @@
 %% trajectory generation
 
 %define a set of "waypoints" (contraints) for the trajectory
-traj_sel = 2;
+traj_sel = 1;
 
 % time [s], position (x,y,z) [m], Orientation (yaw pitch roll) [DEG]
 if traj_sel==1, 
-    constraints = [0,       20,20,0,    90,0,0;
-                   30,      50,20,5,    90,35,10;
-                   40,      58,15.5,10, 162,25,7;
-                   60,      60,0,2      180,0,0];
+    constraints = [0,        0,     0, -20000,  0, 0,  0;   
+        100,   2500,     0, -20000,  0, 0,  0;  
+        200,   5000,     0, -20000,  0, 0,  0;  
+        250,   6000,   500, -20000, 45, 0, 15;  
+        300,   6500,  1500, -20000, 90, 0,  0;  
+        400,   6500,  4000, -20000, 90, 0,  0;
+        500,   6500,  6500, -20000, 90, 0,  0;];
+        
 elseif traj_sel==2,
     constraints = [ 0   0   0         0         0         0         0;...        
         1   0           0         0         0         0         0;...
@@ -447,7 +451,7 @@ hold on
 plot3(pos(:,1), pos(:,2), pos(:,3),"b" );
 %add arrow along x axis
 % x_axis_nav = Cbn*x_axis_body= Cbn*[1 0 0] = [cos theta * cos psi; cos theta * sin psi; -sin theta];
-undersample=500;
+undersample=2000;
 x_axis_nav_x = cos(rpy(:,2)).*cos(rpy(:,3));
 x_axis_nav_y = cos(rpy(:,2)).*sin(rpy(:,3));
 x_axis_nav_z = -sin(rpy(:,2));
