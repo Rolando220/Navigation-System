@@ -94,83 +94,83 @@ while ~isDone(trajectory)
    count = count + 1;
 end
 
-%% plot result
-%position
-figure;
-plot3(tInfo.Waypoints(:,1),tInfo.Waypoints(:,2),tInfo.Waypoints(:,3),"r*")
-title("Trajectory")
-xlabel("North")
-ylabel("East")
-zlabel("Down")
-grid on
-axis equal
-hold on
-plot3(pos(:,1), pos(:,2), pos(:,3),"b" );
-hold off
-
-%position wrt time
-figure;
-plot(time, pos(:,1), "r" );
-hold on; grid on;
-plot(time, pos(:,2), "g" );
-plot(time, pos(:,3), "b" );
-plot(tInfo.TimeOfArrival(:,1), tInfo.Waypoints(:,1),'k*');
-plot(tInfo.TimeOfArrival(:,1), tInfo.Waypoints(:,2),'k*');
-plot(tInfo.TimeOfArrival(:,1), tInfo.Waypoints(:,3),'k*');
-title("Position")
-xlabel("Time")
-ylabel("[m]")
-hold off
-legend("North","East","Down")
-
-%velocity
-figure;
-plot(time, vel_n(:,1), "r" );
-hold on; grid on;
-plot(time, vel_n(:,2), "g" );
-plot(time, vel_n(:,3), "b" );
-title("Velocity")
-xlabel("Time")
-ylabel("[m/s]")
-legend("V_n","V_e","V_d")
-hold off
-
-%acceleration
-figure;
-plot(time, acc_n(:,1), "r" );
-hold on; grid on;
-plot(time, acc_n(:,2), "g" );
-plot(time, acc_n(:,3), "b" );
-title("Acceleration in Navigation Frame")
-xlabel("Time")
-ylabel("[m/s^2]")
-legend("a_n","a_e","a_d")
-hold off
-
-%angular velocity
-figure;
-plot(time, omega_n(:,1), "r" );
-hold on; grid on;
-plot(time, omega_n(:,2), "g" );
-plot(time, omega_n(:,3), "b" );
-title("Angular Velocity in Navigation Frame")
-xlabel("Time")
-ylabel("[rad/s]")
-legend("\omega_n","\omega_e","\omega_d")
-hold off
-
-%Orientation (quaternion)
-figure;
-quat_c = compact(quat); %convert to array for plotting
-plot(time, quat_c(:,1), "r" );
-hold on; grid on;
-plot(time, quat_c(:,2), "g" );
-plot(time, quat_c(:,3), "b" );
-plot(time, quat_c(:,4), "m" );
-title("Attitude (Quaternion)")
-xlabel("Time")
-legend("q_0","q_1","q_2","q_3")
-hold off
+% %% plot result
+% %position
+% figure;
+% plot3(tInfo.Waypoints(:,1),tInfo.Waypoints(:,2),tInfo.Waypoints(:,3),"r*")
+% title("Trajectory")
+% xlabel("North")
+% ylabel("East")
+% zlabel("Down")
+% grid on
+% axis equal
+% hold on
+% plot3(pos(:,1), pos(:,2), pos(:,3),"b" );
+% hold off
+% 
+% %position wrt time
+% figure;
+% plot(time, pos(:,1), "r" );
+% hold on; grid on;
+% plot(time, pos(:,2), "g" );
+% plot(time, pos(:,3), "b" );
+% plot(tInfo.TimeOfArrival(:,1), tInfo.Waypoints(:,1),'k*');
+% plot(tInfo.TimeOfArrival(:,1), tInfo.Waypoints(:,2),'k*');
+% plot(tInfo.TimeOfArrival(:,1), tInfo.Waypoints(:,3),'k*');
+% title("Position")
+% xlabel("Time")
+% ylabel("[m]")
+% hold off
+% legend("North","East","Down")
+% 
+% %velocity
+% figure;
+% plot(time, vel_n(:,1), "r" );
+% hold on; grid on;
+% plot(time, vel_n(:,2), "g" );
+% plot(time, vel_n(:,3), "b" );
+% title("Velocity")
+% xlabel("Time")
+% ylabel("[m/s]")
+% legend("V_n","V_e","V_d")
+% hold off
+% 
+% %acceleration
+% figure;
+% plot(time, acc_n(:,1), "r" );
+% hold on; grid on;
+% plot(time, acc_n(:,2), "g" );
+% plot(time, acc_n(:,3), "b" );
+% title("Acceleration in Navigation Frame")
+% xlabel("Time")
+% ylabel("[m/s^2]")
+% legend("a_n","a_e","a_d")
+% hold off
+% 
+% %angular velocity
+% figure;
+% plot(time, omega_n(:,1), "r" );
+% hold on; grid on;
+% plot(time, omega_n(:,2), "g" );
+% plot(time, omega_n(:,3), "b" );
+% title("Angular Velocity in Navigation Frame")
+% xlabel("Time")
+% ylabel("[rad/s]")
+% legend("\omega_n","\omega_e","\omega_d")
+% hold off
+% 
+% %Orientation (quaternion)
+% figure;
+% quat_c = compact(quat); %convert to array for plotting
+% plot(time, quat_c(:,1), "r" );
+% hold on; grid on;
+% plot(time, quat_c(:,2), "g" );
+% plot(time, quat_c(:,3), "b" );
+% plot(time, quat_c(:,4), "m" );
+% title("Attitude (Quaternion)")
+% xlabel("Time")
+% legend("q_0","q_1","q_2","q_3")
+% hold off
 
 
 %% create ideal inertial measurements
@@ -213,48 +213,48 @@ for idx=1:length(time),
     eul_out_bis = eul_out_bis([3 2 1]); %adjust for order of angles returned by rotm2eul
     rpy_bis(idx,:)= eul_out_bis;
 end
-%compare obtained euler angles
-figure; 
-plot(time,rpy,'r');
-hold on;
-plot(time,rpy_bis,'b:','linewidth',2);
-hold off; grid on;
-
-%plot Euler angles
-figure;
-plot(time, rpy(:,1), "r" );
-hold on; grid on;
-plot(time, rpy(:,2), "g" );
-plot(time, rpy(:,3), "b" );
-title("Euler Angles")
-xlabel("Time")
-ylabel("[rad]")
-legend("Roll","Pitch","Yaw")
-hold off
-
-%plot angular velocity in body frame
-figure;
-plot(time, pqr(:,1), "r" );
-hold on; grid on;
-plot(time, pqr(:,2), "g" );
-plot(time, pqr(:,3), "b" );
-title("Angular Velocity in Body frame")
-xlabel("Time")
-ylabel("[rad/s]")
-legend("\omega_x","\omega_y","\omega_z")
-hold off
-
-%plot acceleration in body frame
-figure;
-plot(time, acc(:,1), "r" );
-hold on; grid on;
-plot(time, acc(:,2), "g" );
-plot(time, acc(:,3), "b" );
-title("Acceleration in Body frame")
-xlabel("Time")
-ylabel("[m/s^2]")
-legend("acc_x","acc_y","acc_z")
-hold off
+% %compare obtained euler angles
+% figure; 
+% plot(time,rpy,'r');
+% hold on;
+% plot(time,rpy_bis,'b:','linewidth',2);
+% hold off; grid on;
+% 
+% %plot Euler angles
+% figure;
+% plot(time, rpy(:,1), "r" );
+% hold on; grid on;
+% plot(time, rpy(:,2), "g" );
+% plot(time, rpy(:,3), "b" );
+% title("Euler Angles")
+% xlabel("Time")
+% ylabel("[rad]")
+% legend("Roll","Pitch","Yaw")
+% hold off
+% 
+% %plot angular velocity in body frame
+% figure;
+% plot(time, pqr(:,1), "r" );
+% hold on; grid on;
+% plot(time, pqr(:,2), "g" );
+% plot(time, pqr(:,3), "b" );
+% title("Angular Velocity in Body frame")
+% xlabel("Time")
+% ylabel("[rad/s]")
+% legend("\omega_x","\omega_y","\omega_z")
+% hold off
+% 
+% %plot acceleration in body frame
+% figure;
+% plot(time, acc(:,1), "r" );
+% hold on; grid on;
+% plot(time, acc(:,2), "g" );
+% plot(time, acc(:,3), "b" );
+% title("Acceleration in Body frame")
+% xlabel("Time")
+% ylabel("[m/s^2]")
+% legend("acc_x","acc_y","acc_z")
+% hold off
 
 %% verify that acceleration and velocity are consistent with position
 
@@ -266,50 +266,50 @@ pos_vi_t = cumtrapz(vel_n).*ST+pos(1,:);
 pos_ai_t = cumtrapz(cumtrapz(acc_n).*ST+vel_n(1,:)).*ST+pos(1,:);
 
 
-figure;
-plot(time,pos(:,1),'r', ...
-     time,pos(:,2),'r', ...
-     time,pos(:,3),'r');
-hold on;
-plot(time,pos_vi(:,1),'b', ...
-     time,pos_vi(:,2),'b', ...
-     time,pos_vi(:,3),'b');
-plot(time,pos_ai(:,1),'g', ...
-     time,pos_ai(:,2),'g', ...
-     time,pos_ai(:,3),'g');
-plot(time,pos_vi_t(:,1),'k:', ...
-     time,pos_vi_t(:,2),'k:', ...
-     time,pos_vi_t(:,3),'k:');
-plot(time,pos_ai_t(:,1),'m:', ...
-     time,pos_ai_t(:,2),'m:', ...
-     time,pos_ai_t(:,3),'m:');
-hold off
-title("Position Over Time")
-legend; %("North","East","Down")
-xlabel("Time (seconds)")
-ylabel("Position (m)")
-grid on
-
-
-figure;
-plot(time,pos_vi(:,1)-pos(:,1),'b', ...
-     time,pos_vi(:,2)-pos(:,2),'b', ...
-     time,pos_vi(:,3)-pos(:,3),'b');
-hold on;
-plot(time,pos_ai(:,1)-pos(:,1),'g', ...
-     time,pos_ai(:,2)-pos(:,2),'g', ...
-     time,pos_ai(:,3)-pos(:,3),'g');
-plot(time,pos_vi_t(:,1)-pos(:,1),'k', ...
-     time,pos_vi_t(:,2)-pos(:,2),'k', ...
-     time,pos_vi_t(:,3)-pos(:,3),'k');
-plot(time,pos_ai_t(:,1)-pos(:,1),'m', ...
-     time,pos_ai_t(:,2)-pos(:,2),'m', ...
-     time,pos_ai_t(:,3)-pos(:,3),'m');
-title("Position Over Time ERROR")
-legend; %("North","East","Down")
-xlabel("Time (seconds)")
-ylabel("Position (m)")
-grid on
+% figure;
+% plot(time,pos(:,1),'r', ...
+%      time,pos(:,2),'r', ...
+%      time,pos(:,3),'r');
+% hold on;
+% plot(time,pos_vi(:,1),'b', ...
+%      time,pos_vi(:,2),'b', ...
+%      time,pos_vi(:,3),'b');
+% plot(time,pos_ai(:,1),'g', ...
+%      time,pos_ai(:,2),'g', ...
+%      time,pos_ai(:,3),'g');
+% plot(time,pos_vi_t(:,1),'k:', ...
+%      time,pos_vi_t(:,2),'k:', ...
+%      time,pos_vi_t(:,3),'k:');
+% plot(time,pos_ai_t(:,1),'m:', ...
+%      time,pos_ai_t(:,2),'m:', ...
+%      time,pos_ai_t(:,3),'m:');
+% hold off
+% title("Position Over Time")
+% legend; %("North","East","Down")
+% xlabel("Time (seconds)")
+% ylabel("Position (m)")
+% grid on
+% 
+% 
+% figure;
+% plot(time,pos_vi(:,1)-pos(:,1),'b', ...
+%      time,pos_vi(:,2)-pos(:,2),'b', ...
+%      time,pos_vi(:,3)-pos(:,3),'b');
+% hold on;
+% plot(time,pos_ai(:,1)-pos(:,1),'g', ...
+%      time,pos_ai(:,2)-pos(:,2),'g', ...
+%      time,pos_ai(:,3)-pos(:,3),'g');
+% plot(time,pos_vi_t(:,1)-pos(:,1),'k', ...
+%      time,pos_vi_t(:,2)-pos(:,2),'k', ...
+%      time,pos_vi_t(:,3)-pos(:,3),'k');
+% plot(time,pos_ai_t(:,1)-pos(:,1),'m', ...
+%      time,pos_ai_t(:,2)-pos(:,2),'m', ...
+%      time,pos_ai_t(:,3)-pos(:,3),'m');
+% title("Position Over Time ERROR")
+% legend; %("North","East","Down")
+% xlabel("Time (seconds)")
+% ylabel("Position (m)")
+% grid on
 
 
 %% verify that angular velocity is consistent with euler angles
@@ -326,18 +326,18 @@ for idx=2:length(time),
     eul_rates = J*pqr(idx,:)';
     rpy_i(idx,:)=rpy_i(idx-1,:)+eul_rates'.*ST;
 end
-figure; 
-plot(time,rpy);
-hold on;
-plot(time,rpy_i);
-title("Euler angles over Time")
-hold off; grid on;
-
-figure; 
-rpy_err=wrapToPi(wrapToPi(rpy)-wrapToPi(rpy_i));
-plot(time,rpy_err);
-title("Euler angles over Time ERROR")
-hold off; grid on;
+% figure; 
+% plot(time,rpy);
+% hold on;
+% plot(time,rpy_i);
+% title("Euler angles over Time")
+% hold off; grid on;
+% 
+% figure; 
+% rpy_err=wrapToPi(wrapToPi(rpy)-wrapToPi(rpy_i));
+% plot(time,rpy_err);
+% title("Euler angles over Time ERROR")
+% hold off; grid on;
 
 %% smooth accelerations and recompute everything
 
@@ -356,55 +356,55 @@ lpfilt_td = c2d(lpfilt,ST);
 %filer acceleration
 acc_n_f = filter(lpfilt_td.Numerator{1}, lpfilt_td.Denominator{1},acc_n);
 
-%acceleration
-figure;
-plot(time, acc_n(:,1), "r" );
-hold on; grid on;
-plot(time, acc_n(:,2), "g" );
-plot(time, acc_n(:,3), "b" );
-plot(time, acc_n_f(:,1), "r:" , 'linewidth',2);
-plot(time, acc_n_f(:,2), "g:" , 'linewidth',2);
-plot(time, acc_n_f(:,3), "b:" , 'linewidth',2);
-title("Acceleration in Navigation Frame")
-xlabel("Time")
-ylabel("[m/s^2]")
-legend("a_n","a_e","a_d","a_n filt","a_e filt","a_d filt")
-hold off
+% %acceleration
+% figure;
+% plot(time, acc_n(:,1), "r" );
+% hold on; grid on;
+% plot(time, acc_n(:,2), "g" );
+% plot(time, acc_n(:,3), "b" );
+% plot(time, acc_n_f(:,1), "r:" , 'linewidth',2);
+% plot(time, acc_n_f(:,2), "g:" , 'linewidth',2);
+% plot(time, acc_n_f(:,3), "b:" , 'linewidth',2);
+% title("Acceleration in Navigation Frame")
+% xlabel("Time")
+% ylabel("[m/s^2]")
+% legend("a_n","a_e","a_d","a_n filt","a_e filt","a_d filt")
+% hold off
 
 %recompute velocity and position (starting from 0 velocity)
 vel_n_f = cumtrapz(acc_n_f).*ST+vel_n(1,:);
 pos_f = cumtrapz(vel_n_f).*ST+pos(1,:);
 
-%plot new trajectory 
-figure;
-plot(time,pos(:,1),'r', ...
-     time,pos(:,2),'r', ...
-     time,pos(:,3),'r');
-hold on;
-plot(time,pos_f(:,1),'b:',  ...
-     time,pos_f(:,2),'b:', ...
-     time,pos_f(:,3),'b:', 'linewidth',2);
-hold off
-title("Position Over Time")
-legend; %("North","East","Down")
-xlabel("Time (seconds)")
-ylabel("[m]")
-grid on
-
-figure;
-plot(time,vel_n(:,1),'r', ...
-     time,vel_n(:,2),'r', ...
-     time,vel_n(:,3),'r');
-hold on;
-plot(time,vel_n_f(:,1),'b', ...
-     time,vel_n_f(:,2),'b', ...
-     time,vel_n_f(:,3),'b', 'linewidth',2);
-hold off
-title("Velocity Over Time")
-legend; %("North","East","Down")
-xlabel("Time (seconds)")
-ylabel("[m/s]")
-grid on
+% %plot new trajectory 
+% figure;
+% plot(time,pos(:,1),'r', ...
+%      time,pos(:,2),'r', ...
+%      time,pos(:,3),'r');
+% hold on;
+% plot(time,pos_f(:,1),'b:',  ...
+%      time,pos_f(:,2),'b:', ...
+%      time,pos_f(:,3),'b:', 'linewidth',2);
+% hold off
+% title("Position Over Time")
+% legend; %("North","East","Down")
+% xlabel("Time (seconds)")
+% ylabel("[m]")
+% grid on
+% 
+% figure;
+% plot(time,vel_n(:,1),'r', ...
+%      time,vel_n(:,2),'r', ...
+%      time,vel_n(:,3),'r');
+% hold on;
+% plot(time,vel_n_f(:,1),'b', ...
+%      time,vel_n_f(:,2),'b', ...
+%      time,vel_n_f(:,3),'b', 'linewidth',2);
+% hold off
+% title("Velocity Over Time")
+% legend; %("North","East","Down")
+% xlabel("Time (seconds)")
+% ylabel("[m/s]")
+% grid on
 
 %recompute acc in body frame
 acc_f = acc;
@@ -413,21 +413,21 @@ for idx=1:length(time),
     rm = rotmat(q_in,'frame'); %this rot mat transforms nav to body
     acc_f(idx,:) = (rm*acc_n_f(idx,:)')'; 
 end
-%and compare 
-figure;
-plot(time,acc(:,1),'r', ...
-     time,acc(:,2),'r', ...
-     time,acc(:,3),'r');
-hold on;
-plot(time,acc_f(:,1),'b', ...
-     time,acc_f(:,2),'b', ...
-     time,acc_f(:,3),'b', 'linewidth',2);
-hold off
-title("Acceleration Over Time")
-legend; %("North","East","Down")
-xlabel("Time (seconds)")
-ylabel("[m/s]")
-grid on
+% %and compare 
+% figure;
+% plot(time,acc(:,1),'r', ...
+%      time,acc(:,2),'r', ...
+%      time,acc(:,3),'r');
+% hold on;
+% plot(time,acc_f(:,1),'b', ...
+%      time,acc_f(:,2),'b', ...
+%      time,acc_f(:,3),'b', 'linewidth',2);
+% hold off
+% title("Acceleration Over Time")
+% legend; %("North","East","Down")
+% xlabel("Time (seconds)")
+% ylabel("[m/s]")
+% grid on
 
 %% replace raw acc with filtered acc (and pos and vel)
 use_filtered_acc = 1;
@@ -501,13 +501,104 @@ set(gca,"XDir","reverse")
 set(gca,"ZDir","reverse")
 
 
-%% create accelerometer measurments (by adding gravity)
-%add gravity to acc in body frame
-%define gravity value
-g_n = [0 0 9.81]';
+% %% create accelerometer measurments (by adding gravity)
+% %add gravity to acc in body frame
+% %define gravity value
+% g_n = [0 0 9.81]';
+% acc_f = acc;
+% for idx=1:length(time),
+%     q_in = quat(idx,:);
+%     rm = rotmat(q_in,'frame'); %this rot mat transforms nav to body
+%     acc(idx,:) = acc(idx,:)-(rm*g_n)'; %add gravity with - sign
+% end
+
+%% Conversione in Lat, Lon, Alt (WGS84) per confronto in Simulink
+
+re = 6378137;
+eps = 0.0818191908426;
+eps2 = eps^2;
+omega_E = 7.292115e-5; % Velocità di rotazione terrestre [rad/s]
+
+g_wgs0 = 9.7803267714;
+g_wgs1 = 0.00193185138639;
+
+% --- CONDIZIONI INIZIALI ---
+% IMPORTANTE: Questi tre valori DEVONO essere inseriti come "Initial Condition" 
+% anche nel blocco "Discrete-Time Integrator" della posizione in Simulink!
+
+lat0 = 40.8522 * pi/180; 
+lon0 = 14.2681 * pi/180;  
+
+% L'altitudine iniziale (h) è l'opposto dell'asse Down (D) al tempo zero
+h0 = -pos(1, 3);      
+
+% Inizializziamo il vettore posizione ideale [Lat, Lon, Alt]
+pos_ideal_LLH = zeros(length(time), 3);
+pos_ideal_LLH(1,:) = [lat0, lon0, h0];
+
+pqr_inertial = zeros(length(time), 3);
+pqr_inertial(1,:) = pqr(1,:);
+
 acc_f = acc;
-for idx=1:length(time),
-    q_in = quat(idx,:);
-    rm = rotmat(q_in,'frame'); %this rot mat transforms nav to body
-    acc(idx,:) = acc(idx,:)-(rm*g_n)'; %add gravity with - sign
+sin2phi0 = sin(lat0)^2;
+g0 = g_wgs0 * (1 + g_wgs1 * sin2phi0) / sqrt(1 - eps2 * sin2phi0);
+g_ellipsoid0 = [0; 0; g0];
+rm0 = rotmat(quat(1,:), 'frame');
+acc(1,:) = acc(1,:) - (rm0 * g_ellipsoid0)';
+
+% --- INTEGRAZIONE IDEALE ---
+for i = 2:length(time)
+    prev_lat = pos_ideal_LLH(i-1, 1);
+    prev_lon = pos_ideal_LLH(i-1, 2);
+    prev_h   = pos_ideal_LLH(i-1, 3);
+    
+    % Preleviamo le velocità perfette senza rumore
+    vel_N = vel_n(i-1, 1);
+    vel_E = vel_n(i-1, 2);
+    vel_D = vel_n(i-1, 3);
+    
+    phi = prev_lat;
+    h = prev_h;
+    sin2phi = sin(phi)^2;
+    den = 1 - eps2 * sin2phi; 
+    R_N = re / (sqrt(den));
+    R_M = R_N * (1 - eps2) / den;
+    
+    % --- Derivate cinematiche ---
+    lat_dot = vel_N / (R_M + h);
+    lon_dot = vel_E / ((R_N + h) * cos(phi));
+    h_dot   = -vel_D;
+    
+    % --- Aggiornamento passo-passo ---
+    pos_ideal_LLH(i, 1) = prev_lat + lat_dot * ST;
+    pos_ideal_LLH(i, 2) = prev_lon + lon_dot * ST;
+    pos_ideal_LLH(i, 3) = prev_h   + h_dot * ST;
+
+    % Calcolo gravità
+
+    g = g_wgs0 * (1 + g_wgs1 * sin2phi) / sqrt(1 - eps2 * sin2phi);
+    g_ellipsoid = [0; 0; g];
+    
+    rm = rotmat(quat(i,:), 'frame'); % matrice di rotazione da Nav a Body
+    acc(i,:) = acc(i,:) - (rm * g_ellipsoid)';
+
+    omega_ie_n = [omega_E * cos(phi); 0; -omega_E * sin(phi)];
+    omega_en_n = [vel_E / (R_N + h); -vel_N / (R_M + h); -vel_E * tan(phi) / (R_N + h)];
+    omega_in_n = omega_ie_n + omega_en_n;
+    
+    % Prendiamo l'assetto ideale a questo istante
+    curr_roll = rpy(i-1, 1); curr_pitch = rpy(i-1, 2); curr_yaw = rpy(i-1, 3);
+    cph = cos(curr_roll);   sph = sin(curr_roll);
+    cth = cos(curr_pitch);  sth = sin(curr_pitch);
+    cps = cos(curr_yaw);    sps = sin(curr_yaw);
+    
+    % Matrice C_b_n (da Body a NED)
+    C_b_n = [cth*cps,  sph*sth*cps - cph*sps,  cph*sth*cps + sph*sps;
+             cth*sps,  sph*sth*sps + cph*cps,  cph*sth*sps - sph*cps;
+             -sth,     sph*cth,                cph*cth];
+             
+    % Aggiungiamo la rotazione dell'ellissoide al pqr ideale
+    pqr_inertial(i,:) = pqr(i,:) + (C_b_n' * omega_in_n)';
 end
+
+%time_pos_ideal = [time, pos_ideal_LLH];
