@@ -602,3 +602,12 @@ for i = 2:length(time)
 end
 
 %time_pos_ideal = [time, pos_ideal_LLH];
+
+parameters.dt_ekf = 0.01;
+parameters.Q = 0.01;
+parameters.Q_acc = 0.01;
+var_ahrs = 0.0003;
+parameters.R_ahrs = diag([var_ahrs, var_ahrs, var_ahrs]);
+R_p = 0.0000001;
+R_v = 0.0000001;
+parameters.R_gps = diag([R_p, R_p, R_p, R_v, R_v, R_v]);
