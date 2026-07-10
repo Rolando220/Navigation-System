@@ -1,10 +1,10 @@
 %% trajectory generation
 
 %define a set of "waypoints" (contraints) for the trajectory
-traj_sel = 1;
+traj_sel = 4;
 
 % time [s], position (x,y,z) [m], Orientation (yaw pitch roll) [DEG]
-if traj_sel==1, 
+if traj_sel==1 
     constraints = [0,        0,     0, -20000,  0, 0,  0;   
         100,   2500,     0, -20000,  0, 0,  0;  
         200,   5000,     0, -20000,  0, 0,  0;  
@@ -13,7 +13,7 @@ if traj_sel==1,
         400,   6500,  4000, -20000, 90, 0,  0;
         500,   6500,  6500, -20000, 90, 0,  0;];
         
-elseif traj_sel==2,
+elseif traj_sel==2
     constraints = [ 0   0   0         0         0         0         0;...        
         1   0           0         0         0         0         0;...
     6.9444   27.0353  -11.0895    -1.2691  -17.8689    4.6448    4.4314;...
@@ -53,10 +53,46 @@ elseif traj_sel==2,
   243.0556    0.3072    4.8638   -0.9765  -90.0000    4.6519   -1.9190;...
   250.0000   -0.6144    1.7510    0.000   -106.4931   14.8082   -9.5876];
 
+elseif traj_sel == 4
+
+    % --- MISSIONE ZEPHYR (Volo Notturno - 30 minuti = 1800 sec) ---
+    % Obiettivo: HAPS nella stratosfera. Niente decollo.
+    % Velocità ~ 20 m/s. Virate lentissime.
+    % Perdita di quota notturna simulata: 200 metri in 30 minuti.
+    
+    T = 0;
+    % Colonne: [Tempo, X(N), Y(E), Z(D), Yaw, Pitch, Roll]
+    % Partiamo a 20.000m esatti, diretti verso Nord. 
+    % Lasciamo Pitch e Roll a zero per non forzare accelerazioni false (ci pensa lo spline).
+    waypoints = [T, 0, 0, -20000, 0, 0, 0]; 
+    
+    % Minuto 5: Tratto dritto verso Nord. Quota scesa di 33m.
+    T = T + 300;
+    waypoints = [waypoints; T, 6000, 0, -19967, 0, 0, 0];
+    
+    % Minuto 10: Virata dolcissima verso Nord-Est
+    T = T + 300;
+    waypoints = [waypoints; T, 11000, 2000, -19933, 45, 0, 0];
+    
+    % Minuto 15: Virata verso Est
+    T = T + 300;
+    waypoints = [waypoints; T, 14000, 6000, -19900, 90, 0, 0];
+    
+    % Minuto 20: Tratto dritto verso Est (Pattugliamento)
+    T = T + 300;
+    waypoints = [waypoints; T, 14000, 12000, -19867, 90, 0, 0];
+    
+    % Minuto 25: Virata verso Sud-Est
+    T = T + 300;
+    waypoints = [waypoints; T, 12000, 17000, -19833, 135, 0, 0];
+    
+    % Minuto 30: Chiusura della curva verso Sud. Quota finale 19.800m.
+    T = T + 300;
+    waypoints = [waypoints; T, 8000, 21000, -19800, 180, 0, 0];
+    
+    constraints = waypoints;
+
 end
-
-
-
 
 %define sample time
 ST = 1/100;
@@ -74,25 +110,36 @@ tInfo = waypointInfo(trajectory);
 % acceleration, and angular velocity at each call. 
 
 %% trajectory samples extraction
-% Call trajectory() in a loop to get, position, velocity and 
-% orientation over time. 
 
-trajectory.reset();
-%build time vector and prepare empty 
-% attitude, pos, vel, acc, angvel vectors
-time = 0:ST:(tInfo.TimeOfArrival(end)-ST);
-time=time';
-quat = zeros(tInfo.TimeOfArrival(end)*trajectory.SampleRate,1,"quaternion");
-vel_n = zeros(tInfo.TimeOfArrival(end)*trajectory.SampleRate,3);
-acc_n = vel_n;
-pos = vel_n;
-omega_n = vel_n;
+% 1. Costruiamo il vettore dei tempi dall'inizio alla fine
+time = (0:ST:(tInfo.TimeOfArrival(end)))';
 
-count = 1;
-while ~isDone(trajectory)
-   [pos(count,:),quat(count),vel_n(count,:),acc_n(count,:),omega_n(count,:)] = trajectory();
-   count = count + 1;
-end
+% 2. ESTRAZIONE VETTORIZZATA (Senza nessun ciclo while!)
+% MATLAB calcolerà centinaia di migliaia di campioni in una frazione di secondo
+[pos, quat, vel_n, acc_n, omega_n] = lookupPose(trajectory, time);
+
+% Fine. Niente pre-allocazione, niente count, niente tagli.
+
+% %% trajectory samples extraction
+% % Call trajectory() in a loop to get, position, velocity and 
+% % orientation over time. 
+% 
+% trajectory.reset();
+% %build time vector and prepare empty 
+% % attitude, pos, vel, acc, angvel vectors
+% time = 0:ST:(tInfo.TimeOfArrival(end)-ST);
+% time=time';
+% quat = zeros(tInfo.TimeOfArrival(end)*trajectory.SampleRate,1,"quaternion");
+% vel_n = zeros(tInfo.TimeOfArrival(end)*trajectory.SampleRate,3);
+% acc_n = vel_n;
+% pos = vel_n;
+% omega_n = vel_n;
+% 
+% count = 1;
+% while ~isDone(trajectory)
+%    [pos(count,:),quat(count),vel_n(count,:),acc_n(count,:),omega_n(count,:)] = trajectory();
+%    count = count + 1;
+% end
 
 % %% plot result
 % %position
@@ -606,8 +653,10 @@ end
 parameters.dt_ekf = 0.01;
 parameters.Q = 0.01;
 parameters.Q_acc = 0.01;
-var_ahrs = 0.0003;
-parameters.R_ahrs = diag([var_ahrs, var_ahrs, var_ahrs]);
-R_p = 0.0000001;
-R_v = 0.0000001;
-parameters.R_gps = diag([R_p, R_p, R_p, R_v, R_v, R_v]);
+var_ahrs_rp = deg2rad(1.0)^2;
+var_ahrs_yaw = deg2rad(2.0)^2;
+parameters.R_ahrs = diag([var_ahrs_rp, var_ahrs_rp, var_ahrs_yaw]);
+R_p_h = (2.5/re)^2;     % varianza gps lat/lon
+R_p_v = 3.5^2;        % varianza gps altitudine
+R_v = 0.05^2;
+parameters.R_gps = diag([R_p_h, R_p_h, R_p_v, R_v, R_v, R_v]);
