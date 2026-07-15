@@ -493,7 +493,7 @@ xlabel("North")
 ylabel("East")
 zlabel("Down")
 grid on
-axis equal
+% axis equal
 hold on
 plot3(pos(:,1), pos(:,2), pos(:,3),"b" );
 %add arrow along x axis
@@ -514,7 +514,7 @@ xlabel("North")
 ylabel("East")
 zlabel("Down")
 grid on
-axis equal
+axis normal
 hold on
 plot3(pos(:,1), pos(:,2), pos(:,3),"b" );
 % x_axis_nav = Cbn*x_axis_body= Cbn*[1 0 0] = [cos theta * cos psi; cos theta * sin psi; -sin theta];
