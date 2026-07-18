@@ -8,6 +8,7 @@
 \usepackage{lmodern}
 \usepackage{microtype}
 \usepackage{amsmath}
+\usepackage{amssymb}
 \usepackage{graphicx}
 \usepackage{hyperref}
 
@@ -142,7 +143,7 @@ These derivatives are numerically integrated to propagate the vehicle's geodetic
 
 \section{Attitude Update and Transport-Rate Compensation}
 
-The attitude of the vehicle is parameterized using Euler angles, namely roll $\phi_{\mathrm{roll}}$, pitch $\theta$, and yaw $\psi$, which represent the orientation of the body frame with respect to the local NED frame.
+The attitude of the vehicle is parameterized using Euler angles, namely roll $\phi$, pitch $\theta$, and yaw $\psi$, which represent the orientation of the body frame with respect to the local NED frame.
 
 The raw angular velocities measured by the gyroscope, $\boldsymbol{\omega}_{ib}^b$, are referenced to the inertial frame. However, the local NED frame is not stationary: it rotates with respect to the inertial frame because of both the Earth's rotation and the motion of the vehicle over the curved Earth surface. This combined rotation is the transport rate, $\boldsymbol{\omega}_{in}^n$, defined as the sum of the Earth rate $\boldsymbol{\omega}_{ie}^n$ and the craft rate $\boldsymbol{\omega}_{en}^n$:
 
@@ -177,15 +178,15 @@ To correctly update the vehicle's attitude, the transport rate must be projected
 
 \begin{equation}
     \begin{bmatrix}
-        \dot{\phi}_{\mathrm{roll}} \\
+        \dot{\phi} \\
         \dot{\theta} \\
         \dot{\psi}
     \end{bmatrix}
     =
     \begin{bmatrix}
-        1 & \sin\phi_{\mathrm{roll}}\tan\theta & \cos\phi_{\mathrm{roll}}\tan\theta \\
-        0 & \cos\phi_{\mathrm{roll}} & -\sin\phi_{\mathrm{roll}} \\
-        0 & \dfrac{\sin\phi_{\mathrm{roll}}}{\cos\theta} & \dfrac{\cos\phi_{\mathrm{roll}}}{\cos\theta}
+        1 & \sin\phi\tan\theta & \cos\phi\tan\theta \\
+        0 & \cos\phi & -\sin\phi \\
+        0 & \dfrac{\sin\phi}{\cos\theta} & \dfrac{\cos\phi}{\cos\theta}
     \end{bmatrix}
     \left( \boldsymbol{\omega}_{ib}^b - C_n^b \boldsymbol{\omega}_{in}^n \right)
     \label{eq:euler_rates}
@@ -210,5 +211,125 @@ where $g_{\mathrm{wgs0}} \approx 9.7803\,\mathrm{m\,s^{-2}}$ is the gravity at t
 \end{equation}
 
 and is transformed into the body frame and subtracted from the specific-force measurements before the velocity update.
+
+\chapter{Sensor Modeling}
+
+The accuracy of the navigation filter heavily relies on the realistic modeling of the onboard sensor suite. To simulate a realistic operational environment, the ideal kinematic data was corrupted by introducing stochastic noise and deterministic biases, parameterized based on commercial components. The system integrates a high-frequency (100 Hz) Inertial Measurement Unit (IMU) and a low-frequency (10 Hz) GNSS receiver.
+
+\section{Inertial Measurement Unit (IMU)}
+
+The inertial sensors were modeled using the technical specifications of the 6-axis InvenSense MPU-6050 IMU. Operating at a sampling frequency of $f_s = 100\,\mathrm{Hz}$, the theoretical noise bandwidth (Nyquist limit) is assumed to be $BW = f_s/2 = 50\,\mathrm{Hz}$.
+
+\subsection{Accelerometer Model}
+
+From the ``Accelerometer Specifications'' section of the datasheet, the following parameters are extracted:
+
+\begin{itemize}
+    \item \textbf{Full-Scale Range:} $\pm 2g$
+    \item \textbf{Noise Power Spectral Density (ND):} $400\,\mu g/\sqrt{\mathrm{Hz}}$
+    \item \textbf{Initial Zero-G Tolerance (Calibration):} $\pm 50\,\mathrm{mg}$ (X and Y axes), $\pm 80\,\mathrm{mg}$ (Z axis)
+\end{itemize}
+
+In accordance with the \textbf{G/a} project specification, the accelerometer bias is not included in the filter's state vector and is not estimated. The measurement uncertainty is therefore entirely absorbed by the stochastic noise model.
+
+Converting the noise density into the International System of Units yields:
+
+\begin{equation}
+    ND_{acc} = 400 \cdot 10^{-6} \cdot 9.81 = 0.003924\,\mathrm{m\,s^{-2}/\sqrt{Hz}}.
+\end{equation}
+
+Assuming white measurement noise, the theoretical standard deviation of the sensor is obtained by multiplying the noise density by the square root of the bandwidth:
+
+\begin{equation}
+    \sigma_{\mathrm{th},acc} = ND_{acc} \cdot \sqrt{BW} = 0.003924 \cdot \sqrt{50} \approx 0.0277\,\mathrm{m\,s^{-2}}.
+\end{equation}
+
+To ensure the robustness of the Kalman filter, as a conservative approach, and to compensate for the unmodeled bias, high-frequency structural vibrations typical of a large-wingspan HAPS, and mounting misalignments, the nominal standard deviation was increased in the simulator to $\sigma_{acc} = 0.05\,\mathrm{m\,s^{-2}}$. Consequently, the accelerometer noise covariance matrix $R_{acc} \in \mathbb{R}^{3 \times 3}$ assumes an isotropic diagonal structure:
+
+\begin{equation}
+    R_{acc} = \operatorname{diag}(\sigma_{acc}^2,\sigma_{acc}^2,\sigma_{acc}^2)
+    = \operatorname{diag}(0.0025,0.0025,0.0025)\,\mathrm{(m\,s^{-2})^2}.
+\end{equation}
+
+\subsection{Gyroscope Model}
+
+From the ``Gyroscope Specifications'' section, the following values are obtained:
+
+\begin{itemize}
+    \item \textbf{Rate Noise Spectral Density (ND):} $0.005^\circ/\mathrm{s}/\sqrt{\mathrm{Hz}}$
+    \item \textbf{Initial Zero-Rate Output (ZRO) Tolerance:} $\pm 20^\circ/\mathrm{s}$
+\end{itemize}
+
+Converting the noise density into radians per second yields:
+
+\begin{equation}
+    ND_{gyro} = 0.005 \cdot \frac{\pi}{180} \approx 8.727 \cdot 10^{-5}\,\mathrm{rad\,s^{-1}/\sqrt{Hz}}.
+\end{equation}
+
+The theoretical standard deviation is calculated by multiplying the noise density by the square root of the bandwidth:
+
+\begin{equation}
+    \sigma_{\mathrm{th},gyro} = ND_{gyro} \cdot \sqrt{BW} = 8.727 \cdot 10^{-5} \cdot \sqrt{50} \approx 0.000617\,\mathrm{rad\,s^{-1}}.
+\end{equation}
+
+Similar to the accelerometer model, this theoretical standard deviation reflects ideal laboratory conditions. During real flight operations, the sensor is exposed to structural vibrations, temperature-induced drifts, and mechanical noise that increase the actual uncertainty. To adopt a conservative approach and ensure the filter does not over-trust the inertial measurements, the simulated standard deviation was increased to $\sigma_{gyro} = 0.003\,\mathrm{rad\,s^{-1}}$.
+
+Regarding the deterministic error, the datasheet declares an initial ZRO tolerance of $\pm 20^\circ/\mathrm{s}$, which mathematically corresponds to an error of $\pm 0.349\,\mathrm{rad\,s^{-1}}$. However, it is standard practice to assume that the vehicle undergoes a pre-flight static calibration procedure to estimate and remove the bulk of this gross initial offset. The bias values injected into the simulation, $\mathbf{b}_{gyro} = [0.005, -0.003, 0.006]^T\,\mathrm{rad\,s^{-1}}$, represent the small uncalibrated residual bias. In accordance with the \textbf{G/a} specification, the filter dynamically estimates this residual bias during the flight to correct the raw measurements.
+
+\section{Attitude and Heading Reference System (AHRS)}
+
+To estimate the aircraft's attitude, the decoupled system uses direct measurements of the Euler angles. The reference sensor chosen for this simulation is the VectorNav VN-100, a miniature high-performance AHRS module.
+
+From the performance specifications section of the datasheet, the following accuracy values are extracted:
+
+\begin{itemize}
+    \item \textbf{Pitch/Roll Accuracy (Dynamic):} $1.0^\circ$ RMS
+    \item \textbf{Magnetic Heading/Yaw Accuracy:} $2.0^\circ$ RMS
+    \item \textbf{Attitude Output Data Rate:} up to $400\,\mathrm{Hz}$
+\end{itemize}
+
+The RMS values provided by the manufacturer were assumed as nominal standard deviations for the measurement noise. To integrate them into the error-state Kalman filter, these values were converted into radians:
+
+\begin{equation}
+    \sigma_{\mathrm{roll/pitch}} = 1.0 \cdot \frac{\pi}{180} \approx 0.0174\,\mathrm{rad}
+\end{equation}
+
+\begin{equation}
+    \sigma_{\mathrm{yaw}} = 2.0 \cdot \frac{\pi}{180} \approx 0.0349\,\mathrm{rad}
+\end{equation}
+
+Since the Euler angles are measured independently, the attitude measurement error covariance matrix assumes a diagonal form:
+
+\begin{equation}
+    R_{\mathrm{ahrs}} = \operatorname{diag}(\sigma_{\mathrm{roll/pitch}}^2,\sigma_{\mathrm{roll/pitch}}^2,\sigma_{\mathrm{yaw}}^2)\,\mathrm{rad^2}.
+\end{equation}
+
+\section{Global Navigation Satellite System (GNSS)}
+
+The navigation block requires absolute position and velocity measurements to bound the intrinsic drift of the inertial integration. The receiver modeled in the system is the u-blox NEO-M8N module.
+
+From the commercial component's specifications, the following key parameters are highlighted:
+
+\begin{itemize}
+    \item \textbf{Maximum Navigation Update Rate:} $10\,\mathrm{Hz}$
+    \item \textbf{Horizontal Position Accuracy (Autonomous):} $2.5\,\mathrm{m}$ CEP
+    \item \textbf{Velocity Accuracy:} $0.05\,\mathrm{m\,s^{-1}}$
+\end{itemize}
+
+Since the positional state vector is expressed in WGS84 geodetic coordinates, the planimetric variance must be converted into radians by normalizing it against the Earth's radius $R_e$:
+
+\begin{equation}
+    \sigma_{\mathrm{pos,horiz}}^2 = \left(\frac{2.5}{R_e}\right)^2\,\mathrm{rad^2}.
+\end{equation}
+
+Regarding the vertical axis, GNSS altitude is typically degraded by worse geometric dilution of precision and uncompensable tropospheric delays. For this reason, the altitude standard deviation was conservatively set to $3.5\,\mathrm{m}$ in the simulator.
+
+The three-dimensional velocity measurements, derived by the receiver through carrier-phase Doppler shift analysis, maintain the nominal datasheet value, with a standard deviation of $\sigma_{\mathrm{vel}} = 0.05\,\mathrm{m\,s^{-1}}$.
+
+The GNSS measurement covariance matrix is then built by assembling the position and velocity variances:
+
+\begin{equation}
+    R_{\mathrm{gps}} = \operatorname{diag}(\sigma_{\mathrm{pos,horiz}}^2,\sigma_{\mathrm{pos,horiz}}^2,3.5^2,\sigma_{\mathrm{vel}}^2,\sigma_{\mathrm{vel}}^2,\sigma_{\mathrm{vel}}^2).
+\end{equation}
 
 \end{document}
