@@ -41,7 +41,7 @@
 \@writefile{toc}{\contentsline {chapter}{\numberline {4}Decoupled INS/GNSS and AHRS Integration via Error-State EKF}{15}{chapter.4}\protected@file@percent }
 \@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\addvspace {10\p@ }}
-\@writefile{toc}{\contentsline {section}{\numberline {4.1}The Error-State EKF Formulation}{15}{section.4.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {4.1}The Error-State KF Formulation}{15}{section.4.1}\protected@file@percent }
 \@writefile{toc}{\contentsline {section}{\numberline {4.2}Qualitative Observability Analysis}{16}{section.4.2}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {4.2.1}Attitude Filter Observability}{16}{subsection.4.2.1}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {4.2.2}Navigation Filter Observability}{16}{subsection.4.2.2}\protected@file@percent }
@@ -53,17 +53,29 @@
 \@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\addvspace {10\p@ }}
 \@writefile{toc}{\contentsline {section}{\numberline {5.1}Attitude and Bias Estimation Performance}{20}{section.5.1}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {5.1}{\ignorespaces Time evolution of the attitude estimation error. The ESKF successfully bounds the drift compared to the diverging Pure INS.}}{20}{figure.5.1}\protected@file@percent }
-\newlabel{fig:attitude_error}{{5.1}{20}{Time evolution of the attitude estimation error. The ESKF successfully bounds the drift compared to the diverging Pure INS}{figure.5.1}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {5.2}{\ignorespaces Dynamic estimation and convergence of the gyroscope biases.}}{21}{figure.5.2}\protected@file@percent }
-\newlabel{fig:gyro_bias_convergence}{{5.2}{21}{Dynamic estimation and convergence of the gyroscope biases}{figure.5.2}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {5.1}{\ignorespaces Statistical metrics for attitude estimation (ESKF).}}{21}{table.5.1}\protected@file@percent }
-\newlabel{tab:attitude_stats}{{5.1}{21}{Statistical metrics for attitude estimation (ESKF)}{table.5.1}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {5.2}Position and Velocity Estimation Performance}{21}{section.5.2}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {5.3}{\ignorespaces Time evolution of the geodetic position estimation error, converted to local NED meters for readability.}}{21}{figure.5.3}\protected@file@percent }
-\newlabel{fig:position_error}{{5.3}{21}{Time evolution of the geodetic position estimation error, converted to local NED meters for readability}{figure.5.3}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {5.4}{\ignorespaces Time evolution of the local velocity estimation error.}}{22}{figure.5.4}\protected@file@percent }
-\newlabel{fig:velocity_error}{{5.4}{22}{Time evolution of the local velocity estimation error}{figure.5.4}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {5.2}{\ignorespaces Statistical metrics for position and velocity estimation (ESKF).}}{22}{table.5.2}\protected@file@percent }
-\newlabel{tab:nav_stats}{{5.2}{22}{Statistical metrics for position and velocity estimation (ESKF)}{table.5.2}{}}
-\gdef \@abspage@last{22}
+\@writefile{lof}{\contentsline {figure}{\numberline {5.1}{\ignorespaces Time evolution of the attitude estimation error resulting from pure mechanization, with no filter applied.}}{21}{figure.5.1}\protected@file@percent }
+\newlabel{fig:error_att_NO_filt}{{5.1}{21}{Time evolution of the attitude estimation error resulting from pure mechanization, with no filter applied}{figure.5.1}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5.2}{\ignorespaces Time evolution of the attitude estimation error resulting from pure mechanization, with the ESKF filter applied.}}{21}{figure.5.2}\protected@file@percent }
+\newlabel{fig:error_att_filt}{{5.2}{21}{Time evolution of the attitude estimation error resulting from pure mechanization, with the ESKF filter applied}{figure.5.2}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {5.1}{\ignorespaces Statistical metrics comparison for attitude estimation (Pure Mechanization vs. ESKF).}}{22}{table.5.1}\protected@file@percent }
+\newlabel{tab:attitude_comparison}{{5.1}{22}{Statistical metrics comparison for attitude estimation (Pure Mechanization vs. ESKF)}{table.5.1}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5.3}{\ignorespaces Time evolution of the gyroscope biases estimated by the ESKF.}}{22}{figure.5.3}\protected@file@percent }
+\newlabel{fig:gyro_bias_convergence}{{5.3}{22}{Time evolution of the gyroscope biases estimated by the ESKF}{figure.5.3}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {5.2}{\ignorespaces Statistical metrics for the estimated gyroscope biases (ESKF).}}{23}{table.5.2}\protected@file@percent }
+\newlabel{tab:gyro_bias_stats}{{5.2}{23}{Statistical metrics for the estimated gyroscope biases (ESKF)}{table.5.2}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {5.2}Position and Velocity Estimation Performance}{23}{section.5.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {5.4}{\ignorespaces Time evolution of the position estimation error resulting from pure mechanization, with no filter applied.}}{23}{figure.5.4}\protected@file@percent }
+\newlabel{fig:error_pos_NO_filt}{{5.4}{23}{Time evolution of the position estimation error resulting from pure mechanization, with no filter applied}{figure.5.4}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5.5}{\ignorespaces Time evolution of the latitude/longitude estimation error resulting from pure mechanization, with ESKF applied.}}{24}{figure.5.5}\protected@file@percent }
+\newlabel{fig:error_lat_lon_filt}{{5.5}{24}{Time evolution of the latitude/longitude estimation error resulting from pure mechanization, with ESKF applied}{figure.5.5}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5.6}{\ignorespaces Time evolution of the altitude estimation error resulting from pure mechanization, with ESKF applied.}}{25}{figure.5.6}\protected@file@percent }
+\newlabel{fig:error_alt_filt}{{5.6}{25}{Time evolution of the altitude estimation error resulting from pure mechanization, with ESKF applied}{figure.5.6}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {5.3}{\ignorespaces Statistical metrics comparison for LLH estimation (Pure Mechanization vs. ESKF).}}{25}{table.5.3}\protected@file@percent }
+\newlabel{tab:pos_comparison}{{5.3}{25}{Statistical metrics comparison for LLH estimation (Pure Mechanization vs. ESKF)}{table.5.3}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5.7}{\ignorespaces Time evolution of the velocity estimation error resulting from pure mechanization, with no filter applied.}}{26}{figure.5.7}\protected@file@percent }
+\newlabel{fig:error_vel_NO_filt}{{5.7}{26}{Time evolution of the velocity estimation error resulting from pure mechanization, with no filter applied}{figure.5.7}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5.8}{\ignorespaces Time evolution of the velocity estimation error resulting from pure mechanization, with ESKF applied.}}{26}{figure.5.8}\protected@file@percent }
+\newlabel{fig:error_vel_filt}{{5.8}{26}{Time evolution of the velocity estimation error resulting from pure mechanization, with ESKF applied}{figure.5.8}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {5.4}{\ignorespaces Statistical metrics comparison for velocity estimation (Pure Mechanization vs. ESKF).}}{27}{table.5.4}\protected@file@percent }
+\newlabel{tab:vel_comparison}{{5.4}{27}{Statistical metrics comparison for velocity estimation (Pure Mechanization vs. ESKF)}{table.5.4}{}}
+\gdef \@abspage@last{27}

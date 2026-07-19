@@ -13,7 +13,7 @@
 \contentsline {section}{\numberline {3.2}Attitude and Heading Reference System (AHRS)}{13}{section.3.2}%
 \contentsline {section}{\numberline {3.3}Global Navigation Satellite System (GNSS)}{13}{section.3.3}%
 \contentsline {chapter}{\numberline {4}Decoupled INS/GNSS and AHRS Integration via Error-State EKF}{15}{chapter.4}%
-\contentsline {section}{\numberline {4.1}The Error-State EKF Formulation}{15}{section.4.1}%
+\contentsline {section}{\numberline {4.1}The Error-State KF Formulation}{15}{section.4.1}%
 \contentsline {section}{\numberline {4.2}Qualitative Observability Analysis}{16}{section.4.2}%
 \contentsline {subsection}{\numberline {4.2.1}Attitude Filter Observability}{16}{subsection.4.2.1}%
 \contentsline {subsection}{\numberline {4.2.2}Navigation Filter Observability}{16}{subsection.4.2.2}%
@@ -23,4 +23,4 @@
 \contentsline {subsection}{\numberline {4.3.3}Filter Tuning: Covariance Matrices $Q$ and $R$}{18}{subsection.4.3.3}%
 \contentsline {chapter}{\numberline {5}Simulation Results and Performance Analysis}{20}{chapter.5}%
 \contentsline {section}{\numberline {5.1}Attitude and Bias Estimation Performance}{20}{section.5.1}%
-\contentsline {section}{\numberline {5.2}Position and Velocity Estimation Performance}{21}{section.5.2}%
+\contentsline {section}{\numberline {5.2}Position and Velocity Estimation Performance}{23}{section.5.2}%
