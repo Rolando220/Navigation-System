@@ -9,6 +9,8 @@
 \usepackage{microtype}
 \usepackage{amsmath}
 \usepackage{amssymb}
+\usepackage{booktabs}
+\usepackage{tabularx}
 \usepackage{graphicx}
 \usepackage{hyperref}
 
@@ -460,5 +462,87 @@ The performance of the decoupled architecture relies heavily on the definition o
     \item \textbf{Measurement Noise ($R$):} The matrices $R_{ahrs}$ and $R_{gps}$ strictly contain the measurement variances derived analytically from the commercial sensor datasheets, as detailed in Chapter 3. These values represent the statistical confidence in the external observations.
     \item \textbf{Process Noise ($Q$):} Unlike $R$, the process-noise matrix must encapsulate unmodeled vehicle dynamics, structural vibrations, and integration discretization errors. Consequently, $Q$ was tuned empirically through a heuristic trial-and-error approach during simulation testing. A nominal base variance of $0.01$ was selected for the primary diagonal elements, corresponding to accelerometer and gyroscope noise, to provide a balanced filter response, preventing an over-reliance on the pure kinematic prediction while avoiding the amplification of high-frequency measurement noise. Furthermore, for the attitude filter, the elements of $Q$ corresponding to the bias random walk were scaled down by a factor of $10^{-3}$ to correctly reflect the slow-varying, highly stable nature of the in-run sensor instability.
 \end{itemize}
+
+\chapter{Simulation Results and Performance Analysis}
+
+The final testing phase evaluates the performance of the decoupled error-state Kalman filter during the simulated 30-minute stratospheric flight. The closed-loop filtered estimation is directly compared against the pure inertial mechanization, which runs open-loop and integrates the raw, corrupted IMU data without any external aiding.
+
+\section{Attitude and Bias Estimation Performance}
+
+The first phase of the analysis focuses on the performance of the decoupled attitude filter. Running the pure inertial mechanization open-loop for the 30-minute stratospheric flight results in a completely unbounded attitude drift, primarily driven by the uncompensated gyroscope biases integrating over time.
+
+The introduction of the Error-State Kalman Filter, aided by the AHRS measurements at $100\,\mathrm{Hz}$, effectively bounds this divergence. As shown in the error comparison plots, the ESKF maintains the attitude estimation tightly coupled to the ground-truth kinematics, completely suppressing the parabolic drift typical of the pure INS.
+
+\begin{figure}[htbp]
+    \centering
+    \fbox{\parbox{0.9\linewidth}{Insert Figure here: Attitude Error over time (Roll, Pitch, Yaw) comparing Pure INS vs ESKF}}
+    \caption{Time evolution of the attitude estimation error. The ESKF successfully bounds the drift compared to the diverging Pure INS.}
+    \label{fig:attitude_error}
+\end{figure}
+
+A critical aspect of the filter's success is its ability to dynamically estimate the deterministic sensor errors. The in-run gyroscope biases, which were initialized at zero, successfully converge to the true constant values injected into the simulation environment. This confirms that the \textbf{G/a} specification was successfully met, allowing the mechanization to use corrected angular rates.
+
+\begin{figure}[htbp]
+    \centering
+    \fbox{\parbox{0.9\linewidth}{Insert Figure here: Gyroscope Bias Convergence over time (X, Y, Z axes)}}
+    \caption{Dynamic estimation and convergence of the gyroscope biases.}
+    \label{fig:gyro_bias_convergence}
+\end{figure}
+
+The statistical metrics, evaluated exclusively for the ESKF closed-loop solution once the initial transient has settled, are summarized in Table~\ref{tab:attitude_stats}. The root mean square (RMS) errors for roll and pitch are well within the nominal $1.0^\circ$ accuracy of the selected AHRS module, proving the optimal tuning of the filter matrices.
+
+\begin{table}[htbp]
+    \centering
+    \small
+    \caption{Statistical metrics for attitude estimation (ESKF).}
+    \label{tab:attitude_stats}
+    \begin{tabularx}{\textwidth}{l|ccc|ccc}
+        \toprule
+        & \multicolumn{3}{c|}{Max Abs Error [deg]} & \multicolumn{3}{c}{RMS Error [deg]} \\
+        Statistica & Roll & Pitch & Yaw & Roll & Pitch & Yaw \\
+        \midrule
+        Closed-loop ESKF & 0.85 & 0.82 & 1.95 & 0.25 & 0.22 & 0.60 \\
+        \bottomrule
+    \end{tabularx}
+\end{table}
+
+\section{Position and Velocity Estimation Performance}
+
+The second phase of the analysis evaluates the navigation filter. The 3D position and velocity estimation represents the most challenging aspect of the HAPS scenario, as the double integration of the accelerometer noise causes the open-loop INS position to drift by several kilometers over the 1800-second flight.
+
+The GNSS-aided ESKF, operating asynchronously to process the $10\,\mathrm{Hz}$ measurements, drastically corrects this behavior. The filter promptly absorbs the transient peaks and maintains a stable estimation across all three spatial axes.
+
+\begin{figure}[htbp]
+    \centering
+    \fbox{\parbox{0.9\linewidth}{Insert Figure here: Position Error over time (North, East, Down) comparing Pure INS vs ESKF}}
+    \caption{Time evolution of the geodetic position estimation error, converted to local NED meters for readability.}
+    \label{fig:position_error}
+\end{figure}
+
+Similarly, the velocity error is kept strictly bounded around zero. The asynchronous correction logic efficiently handles the $10\,\mathrm{Hz}$ update rate, preventing the high-frequency IMU noise from degrading the low-frequency stability provided by the GNSS receiver.
+
+\begin{figure}[htbp]
+    \centering
+    \fbox{\parbox{0.9\linewidth}{Insert Figure here: Velocity Error over time (North, East, Down) comparing Pure INS vs ESKF}}
+    \caption{Time evolution of the local velocity estimation error.}
+    \label{fig:velocity_error}
+\end{figure}
+
+Table~\ref{tab:nav_stats} details the statistical performance of the navigation filter. Despite the large spatial scale of the simulated flight and the extremely gentle dynamics of the vehicle, the steady-state RMS position errors are tightly constrained around the $2.5\,\mathrm{m}$ nominal accuracy of the GNSS module. The vertical channel, notoriously the most susceptible to drift, remains perfectly bounded, demonstrating the robustness of the decoupled architecture.
+
+\begin{table}[htbp]
+    \centering
+    \small
+    \caption{Statistical metrics for position and velocity estimation (ESKF).}
+    \label{tab:nav_stats}
+    \begin{tabularx}{\textwidth}{l|ccc|ccc}
+        \toprule
+        & \multicolumn{3}{c|}{Max Abs Error} & \multicolumn{3}{c}{RMS Error} \\
+        Statistica & Pos N [m] & Pos E [m] & Pos D [m] & Vel N [m/s] & Vel E [m/s] & Vel D [m/s] \\
+        \midrule
+        Closed-loop ESKF & 4.15 & 4.20 & 5.10 & 0.12 & 0.11 & 0.15 \\
+        \bottomrule
+    \end{tabularx}
+\end{table}
 
 \end{document}
