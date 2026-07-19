@@ -626,4 +626,10 @@ The asynchronous correction logic efficiently handles the $10\,\mathrm{Hz}$ upda
     \end{tabularx}
 \end{table}
 
+\chapter{Conclusions}
+
+By implementing a Decoupled Error-State Kalman Filter, the system effectively bounded the catastrophic drift inherent to pure inertial mechanization. The asynchronous multi-rate integration of high-frequency AHRS data and low-frequency GNSS measurements proved highly efficient. The attitude filter successfully isolated and compensated for the deterministic in-run gyroscope biases, while the navigation filter maintained steady-state position and velocity errors well within the nominal accuracy bounds of the selected commercial sensor suite.
+
+Ultimately, the proposed indirect filtering architecture demonstrated excellent numerical stability and robust tracking capabilities, confirming its suitability and reliability for long-endurance stratospheric flight operations.
+
 \end{document}
