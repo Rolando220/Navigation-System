@@ -332,4 +332,133 @@ The GNSS measurement covariance matrix is then built by assembling the position 
     R_{\mathrm{gps}} = \operatorname{diag}(\sigma_{\mathrm{pos,horiz}}^2,\sigma_{\mathrm{pos,horiz}}^2,3.5^2,\sigma_{\mathrm{vel}}^2,\sigma_{\mathrm{vel}}^2,\sigma_{\mathrm{vel}}^2).
 \end{equation}
 
+\chapter{Decoupled INS/GNSS and AHRS Integration via Error-State EKF}
+
+In accordance with the project specifications, the navigation algorithm implements a Decoupled (D) architecture. Rather than utilizing a single, centralized 15-state filter, the estimation process is strictly divided into two independent instances: an Attitude filter and a position and velocity filter. This architectural choice significantly reduces the computational burden by manipulating smaller covariance matrices (6x6 instead of 15x15).
+
+\section{The Error-State EKF Formulation}
+
+The integration between the Inertial Navigation System (INS) and the aiding sensors (AHRS and GNSS) is achieved through an Error-State Extended Kalman Filter (ES-EKF), also known as an Indirect EKF. Unlike a Direct EKF, which attempts to estimate the total state of the vehicle, the ES-EKF exclusively estimates the errors accumulated by the inertial mechanization.
+
+This indirect approach provides several fundamental advantages for the system architecture.
+
+First, the filter always operates close to the origin. Because the error states are continuously reset and kept infinitesimally small, the system stays far from parameter singularities and gimbal lock issues, providing a mathematical guarantee that the linear approximation remains valid at all times. This approach also ensures numerical stability, avoiding the floating-point truncation errors that typically occur in Direct EKFs when manipulating large absolute values, such as the Earth's radius or geodetic coordinates.
+
+Second, the linearization process is fast and analytically simple. Since the error state is always small, all second-order products become negligible. This makes the computation of the Jacobians straightforward, completely bypassing the need for heavy numerical differentiation at runtime.
+
+Finally, the error dynamics are inherently slow because all the fast, large-signal dynamics are integrated exactly by the nominal-state mechanization at the IMU frequency of 100 Hz. This feature is particularly crucial for multi-rate architectures. While the AHRS filter can seamlessly apply its corrections at 100 Hz, the slow error growth allows the navigation filter to apply its computationally expensive GNSS corrections at a much lower rate (10 Hz). This ensures that the system effortlessly ingests asynchronous, low-frequency updates without ever sacrificing the high-frequency dynamic tracking capabilities of the vehicle.
+
+\section{Qualitative Observability Analysis}
+
+Before evaluating the filter's performance, it is crucial to perform a qualitative analysis of the state-vector observability. Observability dictates whether the internal states of the system can be inferred from the available external measurements over time. Thanks to the Decoupled (D) architecture and the chosen sensor suite, the observability of both filters is highly robust.
+
+\subsection{Attitude Filter Observability}
+
+The attitude error-state vector contains six variables: the three Euler-angle errors and the three gyroscope biases.
+
+The AHRS provides direct, absolute measurements of roll, pitch, and yaw. Consequently, the three attitude error states are directly and continuously observable.
+
+Regarding the gyroscope biases, their observability is guaranteed by the kinematic coupling of the system. An uncompensated bias in the gyroscope measurements mathematically integrates into a drifting attitude error. Because the AHRS bounds the attitude drift with absolute measurements, the Kalman filter can unambiguously attribute the observed growing attitude discrepancy to the underlying gyroscope biases. Therefore, under normal dynamic conditions, the entire 6-state attitude vector is fully observable.
+
+\subsection{Navigation Filter Observability}
+
+The navigation error-state vector contains six variables: the three 3D geodetic position errors and the three 3D NED velocity errors.
+
+In this architecture, the qualitative observability is trivial. The aiding sensor is a GNSS receiver configured to output both 3D position and 3D velocity measurements. Because every single state in the navigation filter is directly measured by the external sensor, the observation matrix is the identity matrix. There are no hidden or coupled states to infer indirectly.
+
+\section{Filter Matrices and Asynchronous Multi-Rate Execution}
+
+To handle the different output rates of the sensors, namely the AHRS and IMU at $100\,\mathrm{Hz}$ and the GNSS at $10\,\mathrm{Hz}$, the filters use an asynchronous logic. The prediction step is executed continuously at the IMU discrete time step $\Delta t = 0.01\,\mathrm{s}$, propagating the error covariance. The correction step is triggered only when a new measurement is available, using an internal counter for the lower-frequency GNSS data. Both filters use the Joseph form for the covariance update to guarantee positive semi-definiteness.
+
+\subsection{Attitude Error Filter}
+
+The state vector for the attitude filter comprises the Euler-angle errors and the gyroscope biases:
+
+\begin{equation}
+    \delta x_{att} = [\delta \phi,\delta \theta,\delta \psi,\delta b_{gx},\delta b_{gy},\delta b_{gz}]^T.
+\end{equation}
+
+The continuous-time error dynamics matrix $F_{att}$ maps the gyroscope bias to the Euler-angle rates via the kinematic Jacobian $J$:
+
+\begin{equation}
+    F_{att} = \begin{bmatrix} 0_{3\times3} & -J \\ 0_{3\times3} & 0_{3\times3} \end{bmatrix}.
+\end{equation}
+
+where $J$ is evaluated using the current mechanized attitude:
+
+\begin{equation}
+    J = \begin{bmatrix}
+        1 & \sin\phi\tan\theta & \cos\phi\tan\theta \\
+        0 & \cos\phi & -\sin\phi \\
+        0 & \dfrac{\sin\phi}{\cos\theta} & \dfrac{\cos\phi}{\cos\theta}
+    \end{bmatrix}.
+\end{equation}
+
+The noise mapping matrix $G_{att}$ injects the gyroscope wide-band noise and the bias random walk into the system:
+
+\begin{equation}
+    G_{att} = \begin{bmatrix} -J & 0_{3\times3} \\ 0_{3\times3} & I_{3\times3} \end{bmatrix}.
+\end{equation}
+
+The discrete-time state transition matrix $F_k$ and noise matrix $D_k$ are approximated as
+
+\begin{equation}
+    F_k \approx I_{6\times6} + F_{att}\Delta t
+\end{equation}
+
+\begin{equation}
+    D_k \approx G_{att}\Delta t.
+\end{equation}
+
+During the correction step, the innovation is computed against the AHRS measurements $y_{ahrs}$. The observation matrix $H_{att}$ isolates the first three states:
+
+\begin{equation}
+    H_{att} = [I_{3\times3},0_{3\times3}].
+\end{equation}
+
+\subsection{Navigation Error Filter}
+
+The state vector for the navigation filter comprises the geodetic position errors and the NED velocity errors:
+
+\begin{equation}
+    \delta x_{nav} = [\delta \phi,\delta \lambda,\delta h,\delta v_N,\delta v_E,\delta v_D]^T.
+\end{equation}
+
+The continuous-time error dynamics matrix $F_{nav}$ strictly relates the velocity errors to the geodetic position errors through the transformation matrix $T_r$, which depends on the Earth's local radii of curvature ($R_M$, $R_N$) and the current mechanized altitude $h$:
+
+\begin{equation}
+    F_{nav} = \begin{bmatrix} 0_{3\times3} & T_r \\ 0_{3\times3} & 0_{3\times3} \end{bmatrix}.
+\end{equation}
+
+\begin{equation}
+    T_r = \begin{bmatrix}
+        \frac{1}{R_M + h} & 0 & 0 \\
+        0 & \frac{1}{(R_N + h)\cos\phi} & 0 \\
+        0 & 0 & -1
+    \end{bmatrix}.
+\end{equation}
+
+Since accelerometer bias is not estimated, the noise mapping matrix $G_{nav}$ directly projects the acceleration noise into the velocity-error derivative:
+
+\begin{equation}
+    G_{nav} = \begin{bmatrix} 0_{3\times3} \\ I_{3\times3} \end{bmatrix}.
+\end{equation}
+
+The GNSS provides direct measurements of all six navigation states. Consequently, the measurement matrix $H_{nav}$ is an identity matrix:
+
+\begin{equation}
+    H_{nav} = I_{6\times6}.
+\end{equation}
+
+Because the GNSS updates at $10\,\mathrm{Hz}$, the correction step is executed every 10 iterations of the prediction loop. Upon correction, the estimated errors are extracted and added back to the inertial mechanization, effectively resetting the filter state to zero and closing the indirect Kalman loop.
+
+\subsection{Filter Tuning: Covariance Matrices $Q$ and $R$}
+
+The performance of the decoupled architecture relies heavily on the definition of the process-noise covariance $Q$ and the measurement-noise covariance $R$.
+
+\begin{itemize}
+    \item \textbf{Measurement Noise ($R$):} The matrices $R_{ahrs}$ and $R_{gps}$ strictly contain the measurement variances derived analytically from the commercial sensor datasheets, as detailed in Chapter 3. These values represent the statistical confidence in the external observations.
+    \item \textbf{Process Noise ($Q$):} Unlike $R$, the process-noise matrix must encapsulate unmodeled vehicle dynamics, structural vibrations, and integration discretization errors. Consequently, $Q$ was tuned empirically through a heuristic trial-and-error approach during simulation testing. A nominal base variance of $0.01$ was selected for the primary diagonal elements, corresponding to accelerometer and gyroscope noise, to provide a balanced filter response, preventing an over-reliance on the pure kinematic prediction while avoiding the amplification of high-frequency measurement noise. Furthermore, for the attitude filter, the elements of $Q$ corresponding to the bias random walk were scaled down by a factor of $10^{-3}$ to correctly reflect the slow-varying, highly stable nature of the in-run sensor instability.
+\end{itemize}
+
 \end{document}
