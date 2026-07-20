@@ -334,7 +334,7 @@ The GNSS measurement covariance matrix is then built by assembling the position 
     R_{\mathrm{gps}} = \operatorname{diag}(\sigma_{\mathrm{pos,horiz}}^2,\sigma_{\mathrm{pos,horiz}}^2,3.5^2,\sigma_{\mathrm{vel}}^2,\sigma_{\mathrm{vel}}^2,\sigma_{\mathrm{vel}}^2).
 \end{equation}
 
-\chapter{Decoupled INS/GNSS and AHRS Integration via Error-State EKF}
+\chapter{Decoupled INS/GNSS and AHRS Integration via Error-State KF}
 
 In accordance with the project specifications, the navigation algorithm implements a Decoupled (D) architecture. Rather than utilizing a single, centralized 15-state filter, the estimation process is strictly divided into two independent instances: an Attitude filter and a position and velocity filter. This architectural choice significantly reduces the computational burden by manipulating smaller covariance matrices (6x6 instead of 15x15).
 
