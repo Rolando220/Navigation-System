@@ -377,29 +377,32 @@ To handle the different output rates of the sensors, namely the AHRS and IMU at 
 The state vector for the attitude filter comprises the Euler-angle errors and the gyroscope biases:
 
 \begin{equation}
-    \delta x_{att} = [\delta \phi,\delta \theta,\delta \psi,\delta b_{gx},\delta b_{gy},\delta b_{gz}]^T.
+    \delta x_{att} = \begin{bmatrix} \delta\phi, \delta\theta, \delta\psi, \delta b_{gx}, \delta b_{gy}, \delta b_{gz} \end{bmatrix}^T = \begin{bmatrix} \delta\Theta \\ \delta b_g \end{bmatrix}
 \end{equation}
 
-The continuous-time error dynamics matrix $F_{att}$ maps the gyroscope bias to the Euler-angle rates via the kinematic Jacobian $J$:
-
+To derive the continuous-time error dynamics, we linearize the attitude kinematic equation. The true Euler angles rates are related to the true body angular rates by the kinematic Jacobian $J$:
 \begin{equation}
-    F_{att} = \begin{bmatrix} 0_{3\times3} & -J \\ 0_{3\times3} & 0_{3\times3} \end{bmatrix}.
+    \dot{\Theta} = J \omega_{nb}^b
+\end{equation}
+The gyroscope measures the body rates corrupted by the slowly varying bias $b_g$ and the wide-band noise $w_g$. By applying the perturbation method ($\tilde{x} = x + \delta x$), ignoring the Earth and transport rates errors due to the decoupled assumption, the differential equation for the Euler-angle error $\delta\Theta$ is obtained as:
+\begin{equation}
+    \delta\dot{\Theta} = -J \delta b_g - J w_g
+\end{equation}
+The gyroscope bias is modeled as a random walk process driven by white noise $w_{bg}$:
+\begin{equation}
+    \delta\dot{b}_g = w_{bg}
 \end{equation}
 
+Arranging these differential equations in matrix form ($\delta\dot{x}_{att} = F_{att} \delta x_{att} + G_{att} w_{att}$), we obtain the continuous-time error dynamics matrix $F_{att}$ and the noise mapping matrix $G_{att}$:
+\begin{equation}
+    F_{att} = \begin{bmatrix} 0_{3\times3} & -J \\ 0_{3\times3} & 0_{3\times3} \end{bmatrix}
+\end{equation}
+\begin{equation}
+    G_{att} = \begin{bmatrix} -J & 0_{3\times3} \\ 0_{3\times3} & I_{3\times3} \end{bmatrix}
+\end{equation}
 where $J$ is evaluated using the current mechanized attitude:
-
 \begin{equation}
-    J = \begin{bmatrix}
-        1 & \sin\phi\tan\theta & \cos\phi\tan\theta \\
-        0 & \cos\phi & -\sin\phi \\
-        0 & \dfrac{\sin\phi}{\cos\theta} & \dfrac{\cos\phi}{\cos\theta}
-    \end{bmatrix}.
-\end{equation}
-
-The noise mapping matrix $G_{att}$ injects the gyroscope wide-band noise and the bias random walk into the system:
-
-\begin{equation}
-    G_{att} = \begin{bmatrix} -J & 0_{3\times3} \\ 0_{3\times3} & I_{3\times3} \end{bmatrix}.
+    J = \begin{bmatrix} 1 & \sin\phi \tan\theta & \cos\phi \tan\theta \\ 0 & \cos\phi & -\sin\phi \\ 0 & \frac{\sin\phi}{\cos\theta} & \frac{\cos\phi}{\cos\theta} \end{bmatrix}
 \end{equation}
 
 The discrete-time state transition matrix $F_k$ and noise matrix $D_k$ are approximated as
@@ -423,27 +426,28 @@ During the correction step, the innovation is computed against the AHRS measurem
 The state vector for the navigation filter comprises the geodetic position errors and the NED velocity errors:
 
 \begin{equation}
-    \delta x_{nav} = [\delta \phi,\delta \lambda,\delta h,\delta v_N,\delta v_E,\delta v_D]^T.
+    \delta x_{nav} = \begin{bmatrix} \delta\varphi, \delta\lambda, \delta h, \delta v_N, \delta v_E, \delta v_D \end{bmatrix}^T = \begin{bmatrix} \delta P \\ \delta V^n \end{bmatrix}
 \end{equation}
 
-The continuous-time error dynamics matrix $F_{nav}$ strictly relates the velocity errors to the geodetic position errors through the transformation matrix $T_r$, which depends on the Earth's local radii of curvature ($R_M$, $R_N$) and the current mechanized altitude $h$:
-
+For the position states, the kinematics are governed by the radii of curvature matrix $T_r$. The perturbation of $\dot{P} = T_r V^n$ yields the position error dynamics:
 \begin{equation}
-    F_{nav} = \begin{bmatrix} 0_{3\times3} & T_r \\ 0_{3\times3} & 0_{3\times3} \end{bmatrix}.
+    \delta\dot{P} = T_r \delta V^n
+\end{equation}
+Regarding the velocity error dynamics, the decoupled architecture simplifies the standard mechanization equations. By neglecting the Coriolis and gravity error coupling (which are negligible for the gentle dynamics of the HAPS scenario), the velocity error is primarily driven by the uncompensated accelerometer noise $w_a$ (since accelerometer bias is not estimated according to the \textbf{G/a} specification):
+\begin{equation}
+    \delta\dot{V}^n = w_a
+\end{equation}
+
+Arranging these into the continuous-time state-space formulation ($\delta\dot{x}_{nav} = F_{nav} \delta x_{nav} + G_{nav} w_{nav}$), the resulting system matrices are:
+\begin{equation}
+    F_{nav} = \begin{bmatrix} 0_{3\times3} & T_r \\ 0_{3\times3} & 0_{3\times3} \end{bmatrix}
+\end{equation}
+\begin{equation}
+    T_r = \begin{bmatrix} \frac{1}{R_M+h} & 0 & 0 \\ 0 & \frac{1}{(R_N+h)\cos\varphi} & 0 \\ 0 & 0 & -1 \end{bmatrix}
 \end{equation}
 
 \begin{equation}
-    T_r = \begin{bmatrix}
-        \frac{1}{R_M + h} & 0 & 0 \\
-        0 & \frac{1}{(R_N + h)\cos\phi} & 0 \\
-        0 & 0 & -1
-    \end{bmatrix}.
-\end{equation}
-
-Since accelerometer bias is not estimated, the noise mapping matrix $G_{nav}$ directly projects the acceleration noise into the velocity-error derivative:
-
-\begin{equation}
-    G_{nav} = \begin{bmatrix} 0_{3\times3} \\ I_{3\times3} \end{bmatrix}.
+    G_{nav} = \begin{bmatrix} 0_{3\times3} \\ I_{3\times3} \end{bmatrix}
 \end{equation}
 
 The GNSS provides direct measurements of all six navigation states. Consequently, the measurement matrix $H_{nav}$ is an identity matrix:
