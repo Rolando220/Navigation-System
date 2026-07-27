@@ -477,7 +477,7 @@ The first phase of the analysis focuses on the performance of the decoupled atti
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.9\linewidth]{Images/error_att_NO_filt.png}
+    \makebox[\textwidth][c]{\includegraphics[width=1.2\textwidth]{Images/error_att_NO_filt.png}}
     \caption{Time evolution of the attitude estimation error resulting from pure mechanization, with no filter applied.}
     \label{fig:error_att_NO_filt}
 \end{figure}
@@ -486,7 +486,7 @@ The introduction of the Error-State Kalman Filter, aided by the AHRS measurement
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.9\linewidth]{Images/att_error_filt.png}
+    \makebox[\textwidth][c]{\includegraphics[width=1.2\textwidth]{Images/att_error_filt.png}}
     \caption{Time evolution of the attitude estimation error resulting from pure mechanization, with the ESKF filter applied.}
     \label{fig:error_att_filt}
 \end{figure}
@@ -517,7 +517,7 @@ A critical aspect of the filter's success is its ability to dynamically estimate
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.9\linewidth]{Images/est_bias.png}
+    \makebox[\textwidth][c]{\includegraphics[width=1.2\textwidth]{Images/est_bias.png}}
     \caption{Time evolution of the gyroscope biases estimated by the ESKF.}
     \label{fig:gyro_bias_convergence}
 \end{figure}
@@ -592,7 +592,7 @@ The second phase of the analysis evaluates the navigation filter. The 3D positio
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.9\linewidth]{Images/pos_error_NO_filt.png}
+    \makebox[\textwidth][c]{\includegraphics[width=1.2\textwidth]{Images/pos_error_NO_filt.png}}
     \caption{Time evolution of the position estimation error resulting from pure mechanization, with no filter applied.}
     \label{fig:error_pos_NO_filt}
 \end{figure}
@@ -603,14 +603,14 @@ The GNSS-aided ESKF, operating asynchronously to process the $10\,\mathrm{Hz}$ m
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.9\linewidth]{Images/lat_lon_filt_err.png}
+    \makebox[\textwidth][c]{\includegraphics[width=1.2\textwidth]{Images/lat_lon_filt_err.png}}
     \caption{Time evolution of the latitude/longitude estimation error resulting from pure mechanization, with ESKF applied.}
     \label{fig:error_lat_lon_filt}
 \end{figure}
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.9\linewidth]{Images/alt_filt_err.png}
+    \makebox[\textwidth][c]{\includegraphics[width=1.2\textwidth]{Images/alt_filt_err.png}}
     \caption{Time evolution of the altitude estimation error resulting from pure mechanization, with ESKF applied.}
     \label{fig:error_alt_filt}
 \end{figure}
@@ -642,14 +642,14 @@ A similar massive divergence is observed in the unfiltered velocity kinematics, 
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.9\linewidth]{Images/vel_error_NO_filt.png}
+    \makebox[\textwidth][c]{\includegraphics[width=1.2\textwidth]{Images/vel_error_NO_filt.png}}
     \caption{Time evolution of the velocity estimation error resulting from pure mechanization, with no filter applied.}
     \label{fig:error_vel_NO_filt}
 \end{figure}
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.9\linewidth]{Images/vel_error_filt.png}
+    \makebox[\textwidth][c]{\includegraphics[width=1.2\textwidth]{Images/vel_error_filt.png}}
     \caption{Time evolution of the velocity estimation error resulting from pure mechanization, with ESKF applied.}
     \label{fig:error_vel_filt}
 \end{figure}
