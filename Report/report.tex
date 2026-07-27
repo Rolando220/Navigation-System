@@ -586,6 +586,8 @@ To explicitly quantify this noise attenuation, the measurement errors (pure sens
     \label{fig:err_comp_yaw}
 \end{figure}
 
+\clearpage
+
 \section{Position and Velocity Estimation Performance}
 
 The second phase of the analysis evaluates the navigation filter. The 3D position and velocity estimation represents the most challenging aspect of the HAPS scenario. Due to the double integration of uncompensated accelerometer noise, the open-loop INS position and velocity suffer from catastrophic drift over the 1800-second flight.
@@ -699,7 +701,7 @@ The noise rejection performance is equally evident when analyzing the kinematic 
     \label{fig:traj_vel_d}
 \end{figure}
 
-Similarly, the position tracking performance is depicted in Figures \ref{fig:traj_lat}, \ref{fig:traj_lon}, and \ref{fig:traj_alt}. Despite the significant variance characterizing the standalone GNSS positional fixes, the integrated system effectively rejects the measurement noise. The estimated latitude, longitude, and altitude remain tightly anchored to the ground-truth path, visually confirming the superior accuracy and reliability of the integrated navigation system over uncoupled sensors.
+In parallel, the position tracking performance is depicted in Figures \ref{fig:traj_lat}, \ref{fig:traj_lon}, and \ref{fig:traj_alt}. Despite the significant variance characterizing the standalone GNSS positional fixes, the integrated system effectively rejects the measurement noise. The estimated latitude, longitude, and altitude remain tightly anchored to the ground-truth path, visually confirming the superior accuracy and reliability of the integrated navigation system over uncoupled sensors.
 
 \begin{figure}[htbp]
     \centering
@@ -721,6 +723,8 @@ Similarly, the position tracking performance is depicted in Figures \ref{fig:tra
     \caption{Altitude trajectory tracking (zoomed): Comparison between ground-truth, noisy GNSS measurement, and the ESKF estimation.}
     \label{fig:traj_alt}
 \end{figure}
+
+\clearpage
 
 Finally, the robustness of the decoupled architecture is validated by directly comparing the raw GNSS measurement errors against the ESKF estimation errors. Figures \ref{fig:err_comp_vel_n}, \ref{fig:err_comp_vel_e}, and \ref{fig:err_comp_vel_d} illustrate the velocity error attenuation, where the discrete measurement scatter is significantly damped by the filtering process. 
 
@@ -745,7 +749,7 @@ Finally, the robustness of the decoupled architecture is validated by directly c
     \label{fig:err_comp_vel_d}
 \end{figure}
 
-Similarly, Figures \ref{fig:err_comp_lat}, \ref{fig:err_comp_lon}, and \ref{fig:err_comp_alt} demonstrate the position error reduction. The ESKF effectively bounds the GNSS positional inaccuracies, providing an estimation error that is continuously smoothed and kept well within the raw sensor's uncertainty limits, further proving the success of the data fusion algorithm.
+Correspondingly, Figures \ref{fig:err_comp_lat}, \ref{fig:err_comp_lon}, and \ref{fig:err_comp_alt} demonstrate the position error reduction. The ESKF effectively bounds the GNSS positional inaccuracies, providing an estimation error that is continuously smoothed and kept well within the raw sensor's uncertainty limits, further proving the success of the data fusion algorithm.
 
 \begin{figure}[htbp]
     \centering
