@@ -563,6 +563,29 @@ To further visualize the filter's noise attenuation capabilities, the actual sta
     \label{fig:traj_yaw}
 \end{figure}
 
+To explicitly quantify this noise attenuation, the measurement errors (pure sensor noise) are plotted directly against the filter's estimation errors in Figures \ref{fig:err_comp_roll}, \ref{fig:err_comp_pitch}, and \ref{fig:err_comp_yaw}. The high-frequency stochastic noise introduced by the AHRS is visibly bounded and reduced by the ESKF. These plots demonstrate the filter's capability to effectively filter out the measurement scatter, yielding a clean attitude solution that mitigates the intrinsic inaccuracies of the single sensors.
+
+\begin{figure}[htbp]
+    \centering
+    \makebox[\textwidth][c]{\includegraphics[width=1.2\textwidth]{Images/roll_err.png}}
+    \caption{Roll error comparison (zoomed): AHRS measurement error vs. ESKF estimation error.}
+    \label{fig:err_comp_roll}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \makebox[\textwidth][c]{\includegraphics[width=1.2\textwidth]{Images/pitch_err.png}}
+    \caption{Pitch error comparison (zoomed): AHRS measurement error vs. ESKF estimation error.}
+    \label{fig:err_comp_pitch}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \makebox[\textwidth][c]{\includegraphics[width=1.2\textwidth]{Images/yaw_err.png}}
+    \caption{Yaw error comparison (zoomed): AHRS measurement error vs. ESKF estimation error.}
+    \label{fig:err_comp_yaw}
+\end{figure}
+
 \section{Position and Velocity Estimation Performance}
 
 The second phase of the analysis evaluates the navigation filter. The 3D position and velocity estimation represents the most challenging aspect of the HAPS scenario. Due to the double integration of uncompensated accelerometer noise, the open-loop INS position and velocity suffer from catastrophic drift over the 1800-second flight.
@@ -697,6 +720,52 @@ Similarly, the position tracking performance is depicted in Figures \ref{fig:tra
     \makebox[\textwidth][c]{\includegraphics[width=1.2\textwidth]{Images/altitude.png}}
     \caption{Altitude trajectory tracking (zoomed): Comparison between ground-truth, noisy GNSS measurement, and the ESKF estimation.}
     \label{fig:traj_alt}
+\end{figure}
+
+Finally, the robustness of the decoupled architecture is validated by directly comparing the raw GNSS measurement errors against the ESKF estimation errors. Figures \ref{fig:err_comp_vel_n}, \ref{fig:err_comp_vel_e}, and \ref{fig:err_comp_vel_d} illustrate the velocity error attenuation, where the discrete measurement scatter is significantly damped by the filtering process. 
+
+\begin{figure}[htbp]
+    \centering
+    \makebox[\textwidth][c]{\includegraphics[width=1.2\textwidth]{Images/vel_n_err.png}}
+    \caption{North velocity error comparison (zoomed): GNSS measurement error vs. ESKF estimation error.}
+    \label{fig:err_comp_vel_n}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \makebox[\textwidth][c]{\includegraphics[width=1.2\textwidth]{Images/vel_e_err.png}}
+    \caption{East velocity error comparison (zoomed): GNSS measurement error vs. ESKF estimation error.}
+    \label{fig:err_comp_vel_e}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \makebox[\textwidth][c]{\includegraphics[width=1.2\textwidth]{Images/vel_d_err.png}}
+    \caption{Down velocity error comparison (zoomed): GNSS measurement error vs. ESKF estimation error.}
+    \label{fig:err_comp_vel_d}
+\end{figure}
+
+Similarly, Figures \ref{fig:err_comp_lat}, \ref{fig:err_comp_lon}, and \ref{fig:err_comp_alt} demonstrate the position error reduction. The ESKF effectively bounds the GNSS positional inaccuracies, providing an estimation error that is continuously smoothed and kept well within the raw sensor's uncertainty limits, further proving the success of the data fusion algorithm.
+
+\begin{figure}[htbp]
+    \centering
+    \makebox[\textwidth][c]{\includegraphics[width=1.2\textwidth]{Images/lat_err.png}}
+    \caption{Latitude error comparison (zoomed): GNSS measurement error vs. ESKF estimation error.}
+    \label{fig:err_comp_lat}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \makebox[\textwidth][c]{\includegraphics[width=1.2\textwidth]{Images/lon_err.png}}
+    \caption{Longitude error comparison (zoomed): GNSS measurement error vs. ESKF estimation error.}
+    \label{fig:err_comp_lon}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \makebox[\textwidth][c]{\includegraphics[width=1.2\textwidth]{Images/alt_err.png}}
+    \caption{Altitude error comparison (zoomed): GNSS measurement error vs. ESKF estimation error.}
+    \label{fig:err_comp_alt}
 \end{figure}
 
 \chapter{Conclusions}
