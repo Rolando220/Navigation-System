@@ -540,6 +540,29 @@ The statistical evaluation of the bias estimation is summarized in Table \ref{ta
     \end{tabularx}
 \end{table}
 
+To further visualize the filter's noise attenuation capabilities, the actual state trajectories are compared against the noisy measurements and the filtered estimates. Figures \ref{fig:traj_roll}, \ref{fig:traj_pitch}, and \ref{fig:traj_yaw} display a highly zoomed-in time window of the attitude tracking. The raw AHRS measurements are visibly corrupted by the high-frequency stochastic noise injected into the simulation. In contrast, the ESKF solution seamlessly tracks the ground-truth dynamics, effectively smoothing the measurement noise without introducing any noticeable phase lag.
+
+\begin{figure}[htbp]
+    \centering
+    \makebox[\textwidth][c]{\includegraphics[width=1.2\textwidth]{Images/roll.png}}
+    \caption{Roll trajectory tracking (zoomed): Comparison between ground-truth, noisy AHRS measurement, and the smoothed ESKF estimation.}
+    \label{fig:traj_roll}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \makebox[\textwidth][c]{\includegraphics[width=1.2\textwidth]{Images/pitch.png}}
+    \caption{Pitch trajectory tracking (zoomed): Comparison between ground-truth, noisy AHRS measurement, and the smoothed ESKF estimation.}
+    \label{fig:traj_pitch}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \makebox[\textwidth][c]{\includegraphics[width=1.2\textwidth]{Images/yaw.png}}
+    \caption{Yaw trajectory tracking (zoomed): Comparison between ground-truth, noisy AHRS measurement, and the smoothed ESKF estimation.}
+    \label{fig:traj_yaw}
+\end{figure}
+
 \section{Position and Velocity Estimation Performance}
 
 The second phase of the analysis evaluates the navigation filter. The 3D position and velocity estimation represents the most challenging aspect of the HAPS scenario. Due to the double integration of uncompensated accelerometer noise, the open-loop INS position and velocity suffer from catastrophic drift over the 1800-second flight.
@@ -629,6 +652,52 @@ The asynchronous correction logic efficiently handles the $10\,\mathrm{Hz}$ upda
         \bottomrule
     \end{tabularx}
 \end{table}
+
+The noise rejection performance is equally evident when analyzing the kinematic trajectories. Combining GPS and INS has the primary goal of limiting the estimation drift while simultaneously improving the absolute navigation solution. Figures \ref{fig:traj_vel_n}, \ref{fig:traj_vel_e}, and \ref{fig:traj_vel_d} show a highly zoomed-in perspective of the velocity components. The raw GNSS measurements exhibit discrete, low-rate ($10\,\mathrm{Hz}$) noisy updates. The closed-loop ESKF optimally fuses this information with the high-rate ($100\,\mathrm{Hz}$) inertial integration, yielding a smooth velocity estimate that closely follows the true trajectory, filtering out the GNSS scatter.
+
+\begin{figure}[htbp]
+    \centering
+    \makebox[\textwidth][c]{\includegraphics[width=1.2\textwidth]{Images/vel_n.png}}
+    \caption{North velocity trajectory tracking (zoomed): Comparison between ground-truth, noisy GNSS measurement, and the ESKF estimation.}
+    \label{fig:traj_vel_n}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \makebox[\textwidth][c]{\includegraphics[width=1.2\textwidth]{Images/vel_e.png}}
+    \caption{East velocity trajectory tracking (zoomed): Comparison between ground-truth, noisy GNSS measurement, and the ESKF estimation.}
+    \label{fig:traj_vel_e}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \makebox[\textwidth][c]{\includegraphics[width=1.2\textwidth]{Images/vel_d.png}}
+    \caption{Down velocity trajectory tracking (zoomed): Comparison between ground-truth, noisy GNSS measurement, and the ESKF estimation.}
+    \label{fig:traj_vel_d}
+\end{figure}
+
+Similarly, the position tracking performance is depicted in Figures \ref{fig:traj_lat}, \ref{fig:traj_lon}, and \ref{fig:traj_alt}. Despite the significant variance characterizing the standalone GNSS positional fixes, the integrated system effectively rejects the measurement noise. The estimated latitude, longitude, and altitude remain tightly anchored to the ground-truth path, visually confirming the superior accuracy and reliability of the integrated navigation system over uncoupled sensors.
+
+\begin{figure}[htbp]
+    \centering
+    \makebox[\textwidth][c]{\includegraphics[width=1.2\textwidth]{Images/latitude.png}}
+    \caption{Latitude trajectory tracking (zoomed): Comparison between ground-truth, noisy GNSS measurement, and the ESKF estimation.}
+    \label{fig:traj_lat}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \makebox[\textwidth][c]{\includegraphics[width=1.2\textwidth]{Images/longitude.png}}
+    \caption{Longitude trajectory tracking (zoomed): Comparison between ground-truth, noisy GNSS measurement, and the ESKF estimation.}
+    \label{fig:traj_lon}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \makebox[\textwidth][c]{\includegraphics[width=1.2\textwidth]{Images/altitude.png}}
+    \caption{Altitude trajectory tracking (zoomed): Comparison between ground-truth, noisy GNSS measurement, and the ESKF estimation.}
+    \label{fig:traj_alt}
+\end{figure}
 
 \chapter{Conclusions}
 
